@@ -43,7 +43,7 @@ func main() {
 		if err := proto.Unmarshal(data, metric); err != nil {
 			log.Println("Failed to parse metric:", err)
 			continue
-		}	else {
+		} else {
 			output_channel <- *metric
 		}
 	}
