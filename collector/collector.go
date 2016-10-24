@@ -1,21 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 	"github.com/zakfu/metrics"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 )
-
-func output_metrics(c chan metrics.Metric) {
-	for m := range c {
-		log.Println("Output metric:", m)
-		// Simulate write time
-		time.Sleep(time.Millisecond * 1000)
-	}
-}
 
 func main() {
 	zero, _ := zmq.NewSocket(zmq.PULL)
@@ -30,8 +25,8 @@ func main() {
 	zero.Bind(endpoint)
 	log.Println("Listening on", endpoint)
 
-	output_channel := make(chan metrics.Metric)
-	go output_metrics(output_channel)
+	ch := make(chan metrics.Metric)
+	go OutputMetrics(ch)
 
 	for {
 		data, err := zero.RecvBytes(0)
@@ -44,7 +39,43 @@ func main() {
 			log.Println("Failed to parse metric:", err)
 			continue
 		} else {
-			output_channel <- *metric
+			ch <- *metric
 		}
 	}
+}
+
+func OutputMetrics(ch chan metrics.Metric) {
+	for m := range ch {
+		im := InfluxMetric{&m}
+		fmt.Println(im)
+		// Simulate write time
+		time.Sleep(time.Millisecond * 1000)
+	}
+}
+
+type InfluxMetric struct {
+	Metric *metrics.Metric
+}
+
+func (im InfluxMetric) String() string {
+	var buffer bytes.Buffer
+	buffer.WriteString(im.Metric.Measurement)
+	for _, t := range im.Metric.Tags {
+		buffer.WriteString(",")
+		buffer.WriteString(t.Key)
+		buffer.WriteString("=")
+		buffer.WriteString(t.Value)
+	}
+	buffer.WriteString(" ")
+	for i, f := range im.Metric.Fields {
+		buffer.WriteString(f.Key)
+		buffer.WriteString("=")
+		buffer.WriteString(strconv.FormatInt(f.Value, 10))
+		if i < len(im.Metric.Fields)-1 {
+			buffer.WriteString(",")
+		}
+	}
+	buffer.WriteString(" ")
+	buffer.WriteString(strconv.FormatInt(im.Metric.Timestamp, 10))
+	return buffer.String()
 }

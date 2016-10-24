@@ -5,14 +5,13 @@ import (
 	"math/rand"
 	"os"
 	"time"
+	"strconv"
 	"github.com/zakfu/metrics"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-	
 	zero, _ := zmq.NewSocket(zmq.PUSH)
 	defer zero.Close()
 
@@ -26,10 +25,7 @@ func main() {
 	log.Println("Sending to", endpoint)
 
 	for request_nbr := 0; request_nbr != 10; request_nbr++ {
-		metric := &metrics.Metric {
-			Measurement: "mock_metric",
-			Value: rand.Int63n(1000),
-		}
+		metric := GetMockMetric()
 
 		data, err := proto.Marshal(metric)
 		if err != nil {
@@ -40,5 +36,21 @@ func main() {
 		}
 		
 		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func GetMockMetric() *metrics.Metric {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return &metrics.Metric {
+		Measurement: "cpu_temp",
+		Tags: []*metrics.Metric_Tag {
+			{Key: "host", Value: "host"+strconv.FormatInt(rand.Int63n(3), 10)},
+			{Key: "cpu", Value: "cpu"+strconv.FormatInt(rand.Int63n(3), 10)},
+		},
+		Fields: []*metrics.Metric_Field {
+			{Key: "external", Value: rand.Int63n(100)},
+			{Key: "internal", Value: rand.Int63n(100)},
+		},
+		Timestamp: time.Now().UTC().UnixNano(),
 	}
 }
