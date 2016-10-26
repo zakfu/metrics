@@ -1,7 +1,7 @@
 package metrics
 
 import (
-  "bytes"
+	"bytes"
 	"strconv"
 )
 
