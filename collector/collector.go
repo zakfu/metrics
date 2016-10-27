@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -50,7 +51,7 @@ func OutputMetrics(ch chan metrics.Metric) {
 
 	for m := range ch {
 		im := metrics.InfluxMetric{&m}
-		//fmt.Println(im)
+		fmt.Println(im)
 		conn.Write([]byte(im.String()))
 	}
 }

@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"bytes"
-	"strconv"
+	"fmt"
 )
 
 type InfluxMetric struct {
@@ -13,21 +13,15 @@ func (im InfluxMetric) String() string {
 	var buffer bytes.Buffer
 	buffer.WriteString(im.Measurement)
 	for _, t := range im.Tags {
-		buffer.WriteString(",")
-		buffer.WriteString(t.Key)
-		buffer.WriteString("=")
-		buffer.WriteString(t.Value)
+		buffer.WriteString(fmt.Sprintf(",%s=%s", t.Key, t.Value))
 	}
 	buffer.WriteString(" ")
 	for i, f := range im.Fields {
-		buffer.WriteString(f.Key)
-		buffer.WriteString("=")
-		buffer.WriteString(strconv.FormatInt(f.Value, 10))
+		buffer.WriteString(fmt.Sprintf("%s=%d", f.Key, f.Value))
 		if i < len(im.Fields)-1 {
 			buffer.WriteString(",")
 		}
 	}
-	buffer.WriteString(" ")
-	buffer.WriteString(strconv.FormatInt(im.Timestamp, 10))
+	buffer.WriteString(fmt.Sprintf(" %d", im.Timestamp))
 	return buffer.String()
 }
