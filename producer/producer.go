@@ -24,18 +24,18 @@ func main() {
 	zero.Connect(endpoint)
 	log.Println("Sending to", endpoint)
 
-	for request_nbr := 0; request_nbr != 10; request_nbr++ {
+	for {
 		metric := GetMockMetric()
 
 		data, err := proto.Marshal(metric)
 		if err != nil {
 			log.Fatalln("Failed to encode metric:", err)
-		} else {
-			log.Println("Sending", *metric)
-			zero.SendBytes(data, 0)
 		}
-		
-		time.Sleep(time.Millisecond * 500)
+
+		log.Println("Sending", *metric)
+		zero.SendBytes(data, 0)
+
+		time.Sleep(time.Second)
 	}
 }
 

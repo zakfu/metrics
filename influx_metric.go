@@ -9,7 +9,7 @@ type InfluxMetric struct {
 	*Metric
 }
 
-func (im InfluxMetric) String() string {
+func (im InfluxMetric) Bytes() []byte {
 	var buffer bytes.Buffer
 	buffer.WriteString(im.Measurement)
 	for _, t := range im.Tags {
@@ -23,5 +23,9 @@ func (im InfluxMetric) String() string {
 		}
 	}
 	buffer.WriteString(fmt.Sprintf(" %d", im.Timestamp))
-	return buffer.String()
+	return buffer.Bytes()
+}
+
+func (im InfluxMetric) String() string {
+	return string(im.Bytes())
 }

@@ -52,6 +52,6 @@ func OutputMetrics(ch chan metrics.Metric) {
 	for m := range ch {
 		im := metrics.InfluxMetric{&m}
 		fmt.Println(im)
-		conn.Write([]byte(im.String()))
+		conn.Write(im.Bytes())
 	}
 }
