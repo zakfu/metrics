@@ -2,13 +2,13 @@ package main
 
 import (
 	"flag"
-	"log"
-	"math/rand"
-	"time"
-	"strconv"
-	"github.com/zakfu/metrics"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
+	"github.com/zakfu/metrics"
+	"log"
+	"math/rand"
+	"strconv"
+	"time"
 )
 
 func main() {
@@ -44,13 +44,13 @@ func main() {
 
 func GetMockMetric() *metrics.Metric {
 	rand.Seed(time.Now().UTC().UnixNano())
-	return &metrics.Metric {
+	return &metrics.Metric{
 		Measurement: "cpu_temp",
-		Tags: []*metrics.Metric_Tag {
-			{Key: "host", Value: "host"+strconv.FormatInt(rand.Int63n(3), 10)},
-			{Key: "cpu", Value: "cpu"+strconv.FormatInt(rand.Int63n(3), 10)},
+		Tags: []*metrics.Metric_Tag{
+			{Key: "host", Value: "host" + strconv.FormatInt(rand.Int63n(3), 10)},
+			{Key: "cpu", Value: "cpu" + strconv.FormatInt(rand.Int63n(3), 10)},
 		},
-		Fields: []*metrics.Metric_Field {
+		Fields: []*metrics.Metric_Field{
 			{Key: "external", Value: rand.Int63n(100)},
 			{Key: "internal", Value: rand.Int63n(100)},
 		},

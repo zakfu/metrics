@@ -3,11 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
-	"net"
-	"github.com/zakfu/metrics"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
+	"github.com/zakfu/metrics"
+	"log"
+	"net"
 )
 
 func main() {
