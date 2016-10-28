@@ -1,30 +1,29 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"github.com/zakfu/metrics"
 	"github.com/golang/protobuf/proto"
 	zmq "github.com/pebbe/zmq4"
 )
 
 func main() {
+	bind := flag.String("bind", "*:5555", "host:port to listen on")
+	dump := flag.Bool("dump", false, "show metrics on STDOUT")
+	flag.Parse()
+
 	zero, _ := zmq.NewSocket(zmq.PULL)
 	defer zero.Close()
 
-	endpoint := "tcp://*:"
-	if len(os.Args) == 2 {
-		endpoint += os.Args[1]
-	} else {
-		endpoint += "5555"
-	}
+	endpoint := "tcp://" + *bind
 	zero.Bind(endpoint)
 	log.Println("Listening on", endpoint)
 
 	ch := make(chan metrics.Metric)
-	go OutputMetrics(ch)
+	go OutputMetrics(ch, *dump)
 
 	for {
 		data, err := zero.RecvBytes(0)
@@ -42,7 +41,7 @@ func main() {
 	}
 }
 
-func OutputMetrics(ch chan metrics.Metric) {
+func OutputMetrics(ch chan metrics.Metric, dump bool) {
 	conn, err := net.Dial("udp", "localhost:8089")
 	if err != nil {
 		log.Fatalln("UDP error")
@@ -51,7 +50,9 @@ func OutputMetrics(ch chan metrics.Metric) {
 
 	for m := range ch {
 		im := metrics.InfluxMetric{&m}
-		fmt.Println(im)
+		if dump {
+			fmt.Println(im)
+		}
 		conn.Write(im.Bytes())
 	}
 }

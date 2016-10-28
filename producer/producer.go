@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 	"strconv"
 	"github.com/zakfu/metrics"
@@ -12,15 +12,15 @@ import (
 )
 
 func main() {
+	dest := flag.String("dest", "127.0.0.1:5555", "host:port to send metrics to")
+	interval := flag.Int("interval", 1000, "interval (in milliseconds) at which to send metrics")
+	dump := flag.Bool("dump", false, "show metrics on STDOUT")
+	flag.Parse()
+
 	zero, _ := zmq.NewSocket(zmq.PUSH)
 	defer zero.Close()
 
-	endpoint := "tcp://"
-	if len(os.Args) == 2 {
-		endpoint += os.Args[1]
-	} else {
-		endpoint += "127.0.0.1:5555"
-	}
+	endpoint := "tcp://" + *dest
 	zero.Connect(endpoint)
 	log.Println("Sending to", endpoint)
 
@@ -32,10 +32,13 @@ func main() {
 			log.Fatalln("Failed to encode metric:", err)
 		}
 
-		log.Println("Sending", *metric)
+		if *dump {
+			log.Println("Sending", *metric)
+		}
+
 		zero.SendBytes(data, 0)
 
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * time.Duration(*interval))
 	}
 }
 
